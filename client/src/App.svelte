@@ -1,47 +1,78 @@
-<script>import "./app.css";
-import svelteLogo from './assets/svelte.svg'
-import viteLogo from '/vite.svg'
-import Counter from './lib/Counter.svelte'</script>
+<script>
+  let file;
+  let downloadLink = "";
+  let isLoading = false;
+  let error = ""; // Novo: para mensagens de erro
 
-<main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src="{viteLogo}" class="logo" alt="Vite Logo" />
+  function handleFileChange(event) {
+    file = event.target.files[0];
+    downloadLink = ""; // Reseta o link se um novo arquivo for selecionado
+    error = ""; // Limpa erros anteriores
+  }
+
+  async function convertFile() {
+    if (!file) {
+      error = "Selecione um arquivo primeiro!";
+      return;
+    }
+
+    isLoading = true;
+    error = "";
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("http://localhost:3000/convert/jpg-to-png", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Falha na conversão. Tente outro arquivo.");
+      }
+
+      const blob = await response.blob();
+      downloadLink = URL.createObjectURL(blob);
+    } catch (err) {
+      error = err.message; // Exibe mensagem de erro
+    } finally {
+      isLoading = false;
+    }
+  }
+</script>
+
+<main class="p-8 max-w-md mx-auto">
+  <h1 class="text-2xl font-bold mb-4">Conversor de Arquivos</h1>
+
+  <input
+    type="file"
+    on:change={handleFileChange}
+    accept=".jpg,.jpeg"
+    class="block w-full mb-4"
+  />
+
+  <button
+    on:click={convertFile}
+    disabled={isLoading || !file}
+    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+  >
+    {isLoading ? "Convertendo..." : "Converter para PNG"}
+  </button>
+
+  <!-- {/* Exibe mensagens de erro */} -->
+  {#if error}
+    <p class="mt-4 text-red-500">{error}</p>
+  {/if}
+
+  <!-- {/* Exibe o link de download após a conversão */} -->
+  {#if downloadLink}
+    <a
+      href={downloadLink}
+      download="converted.png"
+      class="block mt-4 text-blue-500 hover:underline"
+    >
+      Baixar arquivo convertido
     </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src="{svelteLogo}" class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
-
-  <div class="card">
-    <Counter></Counter>
-  </div>
-
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
-
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
+  {/if}
 </main>
-
-
-<style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
-</style>
