@@ -26,9 +26,6 @@
 
       const response = await fetch("http://localhost:3000/convert/jpg-to-png", {
         method: "POST",
-        // headers: {
-        //   "Content-Type": "multipart/form-data", // Importante para uploads
-        // },
         body: formData,
       });
 
