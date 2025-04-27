@@ -4,33 +4,48 @@ import cors from 'cors';
 import { convertImage } from './converters/image-converter'
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });  // Pasta temporária
-app.use(express.json());
+const upload = multer({ dest: 'uploads/' });
+
+// app.use(express.json());
 
 const allowedOrigins = [
-  'https://konvrt-app.vercel.app/', // URL do frontend
-  'https://konvrt-jcq2gyanv-torqu4tos-projects.vercel.app', // URL alternativa
-  'http://localhost:5173' // Para desenvolvimento local
+  'https://konvrt-app.vercel.app',
+  'https://konvrt-app-git-main-torqu4tos-projects.vercel.app',
+  'http://localhost:5173'
 ];
-// Libera acesso do frontend (substitua pela URL do seu frontend em produção)
+
+
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permite requests sem origin (como mobile apps ou curl)
+  origin: (origin, callback) => {
+    // Permite requisições sem origin (como mobile apps ou curl)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
+    // Verifica se o domínio está na lista branca
+    if (allowedOrigins.some(allowedOrigin =>
+      origin === allowedOrigin ||
+      origin.endsWith(`.${allowedOrigin.replace('https://', '')}`)
+    )) {
       return callback(null, true);
-    } else {
-      const msg = `A origem ${origin} não tem acesso a este servidor.`;
-      return callback(new Error(msg), false);
     }
+
+    const error = new Error('Acesso bloqueado por CORS');
+    console.error(`Origem bloqueada: ${origin}`);
+    return callback(error, false);
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200 // Para navegadores antigos
 }));
 
-
+// Middleware para log de requisições (útil para debug)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`, {
+    origin: req.headers.origin,
+    'user-agent': req.headers['user-agent']
+  });
+  next();
+});
 
 // Rota de exemplo: Conversão de imagem (JPG → PNG)
 app.post('/convert/jpg-to-png', upload.single('file'), async (req, res) => {
@@ -47,8 +62,20 @@ app.post('/convert/jpg-to-png', upload.single('file'), async (req, res) => {
   }
 });
 
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'live',
+    cors: {
+      allowedOrigins,
+      currentOrigin: req.headers.origin,
+      isAllowed: allowedOrigins.includes(req.headers.origin || '')
+    }
+  });
+});
+
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+  console.log('Origens permitidas:', allowedOrigins);
 });
