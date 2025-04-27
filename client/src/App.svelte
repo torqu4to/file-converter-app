@@ -27,6 +27,9 @@
         "https://konvrt-app.onrender.com/convert/jpg-to-png",
         {
           method: "POST",
+          headers: {
+            "Content-Type": "multipart/form-data", // Importante para uploads
+          },
           body: formData,
         }
       );

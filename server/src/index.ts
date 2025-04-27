@@ -14,8 +14,20 @@ const allowedOrigins = [
 ];
 // Libera acesso do frontend (substitua pela URL do seu frontend em produção)
 app.use(cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST'],
+  origin: function (origin, callback) {
+    // Permite requests sem origin (como mobile apps ou curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      const msg = `A origem ${origin} não tem acesso a este servidor.`;
+      return callback(new Error(msg), false);
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 
@@ -35,4 +47,8 @@ app.post('/convert/jpg-to-png', upload.single('file'), async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log('Backend rodando em http://localhost:3000'));
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
