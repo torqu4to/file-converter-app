@@ -5,14 +5,20 @@ import { convertImage } from './converters/image-converter'
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });  // Pasta temporária
+app.use(express.json());
 
+const allowedOrigins = [
+  'https://konvrt-app.vercel.app/', // URL do frontend
+  'https://konvrt-jcq2gyanv-torqu4tos-projects.vercel.app', // URL alternativa
+  'http://localhost:5173' // Para desenvolvimento local
+];
 // Libera acesso do frontend (substitua pela URL do seu frontend em produção)
 app.use(cors({
-  origin: ['https://konvrt-7jrrz165p-torqu4tos-projects.vercel.app/', 'https://konvrt-app.vercel.app/', 'http://localhost:5173'],
+  origin: allowedOrigins,
   methods: ['GET', 'POST'],
 }));
 
-app.use(express.json());
+
 
 // Rota de exemplo: Conversão de imagem (JPG → PNG)
 app.post('/convert/jpg-to-png', upload.single('file'), async (req, res) => {
