@@ -24,7 +24,7 @@
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://localhost:3000/convert/jpg-to-png", {
+      const response = await fetch("https://konvrt-app.onrender.com", {
         method: "POST",
         body: formData,
       });
@@ -51,7 +51,7 @@
 </script>
 
 <main class="p-8 max-w-md mx-auto">
-  <h1 class="text-2xl font-bold mb-4">Conversor de Arquivo</h1>
+  <h1 class="text-2xl font-bold mb-4">Conversor de Arquivos</h1>
 
   <input
     type="file"
