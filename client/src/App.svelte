@@ -12,7 +12,7 @@
 
   async function convertFile() {
     if (!file) {
-      error = "Selecione um arquivo primeiro!";
+      error = "Selecione um arquivo primeiro!!";
       return;
     }
 
@@ -46,7 +46,7 @@
 </script>
 
 <main class="p-8 max-w-md mx-auto">
-  <h1 class="text-2xl font-bold mb-4">Conversor de Arquivos</h1>
+  <h1 class="text-2xl font-bold mb-4">Conversor de Arquivo</h1>
 
   <input
     type="file"
