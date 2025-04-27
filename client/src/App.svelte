@@ -24,16 +24,13 @@
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(
-        "https://konvrt-app.onrender.com/convert/jpg-to-png",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "multipart/form-data", // Importante para uploads
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch("http://localhost:3000/convert/jpg-to-png", {
+        method: "POST",
+        // headers: {
+        //   "Content-Type": "multipart/form-data", // Importante para uploads
+        // },
+        body: formData,
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
