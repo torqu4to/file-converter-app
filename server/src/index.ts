@@ -8,7 +8,7 @@ const upload = multer({ dest: 'uploads/' });  // Pasta temporária
 
 // Libera acesso do frontend (substitua pela URL do seu frontend em produção)
 app.use(cors({
-  origin: ['https://konvrt-7jrrz165p-torqu4tos-projects.vercel.app/', 'http://localhost:5173'],
+  origin: ['https://konvrt-7jrrz165p-torqu4tos-projects.vercel.app/', 'https://konvrt-app.vercel.app/', 'http://localhost:5173'],
   methods: ['GET', 'POST'],
 }));
 
