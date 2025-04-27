@@ -26,21 +26,24 @@ app.use(cors({
     if (!origin) return callback(null, true);
 
     // Verifica se o domínio está na lista branca
-    if (allowedOrigins.some(allowedOrigin =>
-      origin === allowedOrigin ||
-      origin.endsWith(`.${allowedOrigin.replace('https://', '')}`)
-    )) {
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    const error = new Error('Acesso bloqueado por CORS');
-    console.error(`Origem bloqueada: ${origin}`);
-    return callback(error, false);
+    // // Verifica subdomínios do Vercel
+    // if (origin.endsWith('.vercel.app')) {
+    //   return callback(null, true);
+    // }
+
+    console.log(`Origem bloqueada: ${origin}`);
+    return callback(new Error('Acesso bloqueado por CORS'), false);
   },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: true,
-  optionsSuccessStatus: 200 // Para navegadores antigos
+  optionsSuccessStatus: 204,
+  preflightContinue: false,
+  maxAge: 86400
 }));
 
 // Middleware para log de requisições (útil para debug)
