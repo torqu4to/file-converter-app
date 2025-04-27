@@ -18,6 +18,7 @@
 
     isLoading = true;
     error = "";
+    downloadLink = "";
 
     try {
       const formData = new FormData();
@@ -35,13 +36,20 @@
       );
 
       if (!response.ok) {
-        throw new Error("Falha na conversão. Tente outro arquivo.");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Falha na conversão");
       }
 
       const blob = await response.blob();
       downloadLink = URL.createObjectURL(blob);
     } catch (err) {
-      error = err.message; // Exibe mensagem de erro
+      console.error("Erro na conversão:", err);
+      error = err.message;
+
+      // Log adicional para debug
+      if (err instanceof Error) {
+        console.debug("Stack trace:", err.stack);
+      }
     } finally {
       isLoading = false;
     }

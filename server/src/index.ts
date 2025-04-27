@@ -4,7 +4,12 @@ import cors from 'cors';
 import { convertImage } from './converters/image-converter'
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  }
+});
 
 // app.use(express.json());
 
@@ -49,7 +54,17 @@ app.use((req, res, next) => {
 
 // Rota de exemplo: Conversão de imagem (JPG → PNG)
 app.post('/convert/jpg-to-png', upload.single('file'), async (req, res) => {
+
+  console.log('Iniciando conversão...', {
+    file: req.file ? {
+      name: req.file.originalname,
+      size: req.file.size,
+      path: req.file.path
+    } : null
+  });
+
   if (!req.file) {
+    console.error('Nenhum arquivo recebido');
     res.status(400).send('Nenhum arquivo enviado.');
     return;
   }
