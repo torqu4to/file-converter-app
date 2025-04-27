@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node build/server.js",
-    "dev": "ts-node src/server.ts",
+    "start": "node build/index.js",
+    "dev": "ts-node src/index.ts",
     "build": "tsc",
     "watch": "tsc --watch"
   },
