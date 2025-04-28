@@ -1,47 +1,42 @@
-# Svelte + Vite
+```markdown
+[![Deploy na Vercel](https://vercel.com/button)](https://konvrt-app.vercel.app/)
 
-This template should help get you started developing with Svelte in Vite.
+# 📌 Conversor de Arquivos
 
-## Recommended IDE Setup
+Um projeto full-stack para conversão de arquivos (JPG → PNG, PDF → DOCX, etc.), desenvolvido com:
+- **Frontend**: Svelte + Tailwind CSS (hospedado na Vercel).
+- **Backend**: Node.js + TypeScript (hospedado no Render).
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+🔗 **Links**:
+- [Frontend na Vercel](https://konvrt-app.vercel.app/)
+- [Backend no Render](https://konvrt-app.onrender.com)
+- [Repositório no GitHub](https://github.com/torqu4to/file-converter-app)
 
-## Need an official Svelte framework?
+---
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## 🚀 Funcionalidades
+✅ Conversão de **JPG para PNG** (exemplo inicial)  
+✅ Interface simples e responsiva  
+✅ Integração contínua (deploy automático)  
+✅ Código documentado e com boas práticas  
 
-## Technical considerations
 
-**Why use this over SvelteKit?**
+---
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+## 🛠️ Tecnologias
 
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+| Área         | Tecnologias                                                                 |
+|--------------|-----------------------------------------------------------------------------|
+| **Frontend** | Svelte, Tailwind CSS, Vite, JavaScript                                     |
+| **Backend**  | Node.js, TypeScript, Express, Sharp (imagens), PDF-lib (PDF)               |
+| **Infra**    | Vercel (frontend), Render (backend)                                        |
+| **Ferramentas** | Git, GitHub, ESLint, Deepseek                                             |
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+---
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+🙋‍♂️ Autor
+Feito com ❤️ por torqu4to.
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `checkJs` in the JS template?**
-
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/sveltejs/svelte-hmr/tree/master/packages/svelte-hmr#preservation-of-local-state).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+Contato:
+📧 brunotorquato013@gmail.com
+🔗 (www.linkedin.com/in/torqu4to)

@@ -40,8 +40,6 @@ const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     const allowedOrigins = [
       'https://konvrt-app.vercel.app',
-      'https://konvrt-app-git-main-torqu4tos-projects.vercel.app',
-      'https://konvrt-422f3izqn-torqu4tos-projects.vercel.app',
       'http://localhost:5173'
     ];
 
