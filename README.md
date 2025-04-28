@@ -1,4 +1,3 @@
-```markdown
 [![Deploy na Vercel](https://vercel.com/button)](https://konvrt-app.vercel.app/)
 
 # 📌 Conversor de Arquivos
@@ -8,7 +7,7 @@ Um projeto full-stack para conversão de arquivos (JPG → PNG, PDF → DOCX, et
 - **Backend**: Node.js + TypeScript (hospedado no Render).
 
 🔗 **Links**:
-- [Frontend na Vercel](https://konvrt-app.vercel.app/)
+- [Frontend na Vercel](https://konvrt-app.vercel.app/) 
 - [Backend no Render](https://konvrt-app.onrender.com)
 - [Repositório no GitHub](https://github.com/torqu4to/file-converter-app)
 
@@ -33,10 +32,3 @@ Um projeto full-stack para conversão de arquivos (JPG → PNG, PDF → DOCX, et
 | **Ferramentas** | Git, GitHub, ESLint, Deepseek                                             |
 
 ---
-
-🙋‍♂️ Autor
-Feito com ❤️ por torqu4to.
-
-Contato:
-📧 brunotorquato013@gmail.com
-🔗 (www.linkedin.com/in/torqu4to)
