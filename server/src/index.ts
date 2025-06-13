@@ -4,6 +4,10 @@ import cors, { CorsOptions } from 'cors';
 import sharp from 'sharp';
 import fs from 'fs/promises';
 import path from 'path';
+import { convertPdfToDocx } from './converters/pdf-converter';
+import { convertDocxToPdf } from './converters/docx-to-pdf-converter';
+import { convertTxtToPdf } from './converters/txt-to-pdf-converter';
+import { convertAudio } from './converters/audio-converter';
 
 // 1. Configuração do Express
 const app: Express = express();
@@ -21,7 +25,14 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ): void => {
-  const allowedMimeTypes = ['image/jpeg', 'image/png'];
+  const allowedMimeTypes = [
+    'image/jpeg',
+    'image/png',
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'audio/mpeg',
+    'audio/wav'
+  ];
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
@@ -31,7 +42,7 @@ const fileFilter = (
 
 const upload: Multer = multer({
   dest: 'uploads/',
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   fileFilter
 });
 
@@ -106,6 +117,118 @@ app.post('/convert/jpg-to-png', upload.single('file'), async (req: Request, res:
     } else {
       res.status(500).json({ error: 'Erro desconhecido' });
     }
+  }
+});
+
+app.post('/convert/pdf-to-docx', upload.single('file'), async (req, res): Promise<void> => {
+  if (!req.file) {
+    res.status(400).send('Nenhum arquivo enviado.');
+    return;
+  }
+
+  try {
+    const outputPath = await convertPdfToDocx(req.file.path);
+    res.download(outputPath, () => {
+      // Limpa os arquivos temporários
+      if (req.file) {
+        fs.unlink(req.file.path);
+      }
+      fs.unlink(outputPath);
+    });
+    return;
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Erro na conversão. Certifique-se de que o arquivo é um PDF válido.');
+    return;
+  }
+});
+
+app.post('/convert/docx-to-pdf', upload.single('file'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: 'Nenhum arquivo enviado' });
+      return;
+    }
+
+    const outputFilename = `converted-${Date.now()}.pdf`;
+    const outputPath = path.join(__dirname, '..', 'converted', outputFilename);
+
+    // Garante que o diretório de saída existe
+    await fs.mkdir(path.dirname(outputPath), { recursive: true });
+
+    await convertDocxToPdf(req.file.path, outputPath);
+
+    res.download(outputPath, outputFilename, async (err) => {
+      if (err) {
+        console.error('Erro ao enviar arquivo:', err);
+        res.status(500).json({ error: 'Erro ao enviar arquivo' });
+      }
+      // Limpa os arquivos temporários
+      if (req.file) {
+        await fs.unlink(req.file.path);
+      }
+      await fs.unlink(outputPath);
+    });
+  } catch (error) {
+    console.error('Erro na conversão:', error);
+    res.status(500).json({
+      error: 'Falha na conversão',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
+  }
+});
+
+app.post('/convert/txt-to-pdf', upload.single('file'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: 'Nenhum arquivo enviado' });
+      return;
+    }
+
+    const outputPath = await convertTxtToPdf(req.file.path);
+    res.download(outputPath, () => {
+      // Limpa os arquivos temporários
+      if (req.file) {
+        fs.unlink(req.file.path);
+      }
+      fs.unlink(outputPath);
+    });
+  } catch (error) {
+    console.error('Erro na conversão:', error);
+    res.status(500).json({
+      error: 'Falha na conversão',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
+  }
+});
+
+app.post('/convert/audio', upload.single('file'), async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: 'Nenhum arquivo enviado' });
+      return;
+    }
+
+    const targetFormat = req.body.targetFormat as 'mp3' | 'wav';
+    if (!targetFormat || !['mp3', 'wav'].includes(targetFormat)) {
+      res.status(400).json({ error: 'Formato de destino inválido' });
+      return;
+    }
+
+    const outputPath = await convertAudio(req.file.path, targetFormat);
+    res.download(outputPath, () => {
+      // Limpa os arquivos temporários
+      if (req.file) {
+        fs.unlink(req.file.path);
+      }
+      fs.unlink(outputPath);
+    });
+  } catch (error) {
+    console.error('Erro na conversão:', error);
+    res.status(500).json({
+      error: 'Falha na conversão',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
   }
 });
 
