@@ -3,12 +3,22 @@
 @tailwind utilities;
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  --color-primary: #4A4A4A;
+  --color-secondary: #6B7280;
+  /* Usaremos esta para o ícone de upload */
+  --color-accent: #6C63FF;
+  --color-background: #F9FAFB;
+  --color-card-background: #FFFFFF;
+  --color-border: #E5E7EB;
+  --color-success: #10B981;
+  --color-error: #EF4444;
+
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
   font-weight: 400;
   color-scheme: light;
-  color: #213547;
-  background-color: #ffffff;
+  color: var(--color-primary);
+  background-color: var(--color-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -22,62 +32,195 @@ body {
 }
 
 #app {
-  max-width: 1280px;
+  max-width: 600px;
+  /* Reduzido para um container menor */
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2.5rem 1.5rem;
+  /* Padding ajustado */
+  box-sizing: border-box;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: var(--color-accent);
+  text-decoration: none;
 }
 
 a:hover {
-  color: #535bf2;
+  color: var(--color-primary);
+  text-decoration: underline;
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 3em;
+  /* Levemente menor para caber no container */
   line-height: 1.1;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.8em;
+  /* Ajuste o espaçamento */
+}
+
+h2 {
+  font-size: 1.8em;
+  /* Títulos de seção menores */
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 0.6em;
 }
 
 .card {
   padding: 2em;
+  /* Padding ajustado para o container menor */
+  background-color: var(--color-card-background);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  /* Sombra mais sutil */
 }
 
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  padding: 0.7em 1.5em;
+  /* Botões menores */
   font-size: 1em;
+  /* Fonte menor */
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-accent);
+  color: white;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(108, 99, 255, 0.2);
+  /* Sombra ajustada */
 }
 
 button:hover {
-  border-color: #646cff;
+  background-color: #5A52E6;
+  border-color: #5A52E6;
+  transform: translateY(-1px);
+  /* Leve elevação */
+  box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
 }
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 4px auto var(--color-accent);
+  outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --color-primary: #E0E0E0;
+    --color-secondary: #A0A0A0;
+    --color-background: #1A1A1A;
+    --color-card-background: #2D2D2D;
+    --color-border: #444444;
   }
 
   a:hover {
-    color: #747bff;
+    color: var(--color-primary);
   }
 
   button {
-    background-color: #f9f9f9;
+    background-color: var(--color-accent);
+    color: white;
   }
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 1.8em;
+  /* Padding ajustado */
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: var(--color-card-background);
+}
+
+.custom-file-upload:hover {
+  border-color: var(--color-accent);
+  background-color: #F0F2F5;
+}
+
+.custom-file-upload.drag-over {
+  border-color: var(--color-accent);
+  background-color: #F0F2F5;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+}
+
+
+
+
+select {
+  width: 100%;
+  padding: 0.7em;
+  /* Padding ajustado */
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-card-background);
+  color: var(--color-primary);
+  font-size: 0.95em;
+  /* Fonte menor */
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%236B7280" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  /* Seta personalizada com a cor secundária */
+  background-repeat: no-repeat;
+  background-position: right 0.8em center;
+  background-size: 0.9em;
+  /* Tamanho da seta ajustado */
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+select:focus {
+  border-color: var(--color-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+}
+
+.message-box {
+  padding: 0.8em 1.2em;
+  /* Padding ajustado */
+  border-radius: 8px;
+  margin-top: 1.2em;
+  /* Margem ajustada */
+  font-size: 0.9em;
+  /* Fonte menor */
+  font-weight: 500;
+}
+
+.message-box.success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.message-box.error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+}
+
+.progress-bar-container {
+  width: 100%;
+  background-color: #E0E0E0;
+  border-radius: 5px;
+  margin-top: 0.8em;
+  /* Margem ajustada */
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 8px;
+  /* Altura menor */
+  background-color: var(--color-accent);
+  width: 0%;
+  border-radius: 5px;
+  transition: width 0.3s ease-in-out;
 }

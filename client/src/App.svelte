@@ -1,371 +1,206 @@
-<script lang="ts">
+<script>
   import { onMount } from "svelte";
   import axios from "axios";
 
-  type ConversionType = {
-    label: string;
-    accept: string;
-    group: string;
-  };
-
-  type GroupedConversions = {
-    [key: string]: Array<{ key: string } & ConversionType>;
-  };
-
-  function groupConversions(
-    types: Record<string, ConversionType>,
-  ): GroupedConversions {
-    return Object.entries(types).reduce((acc, [key, value]) => {
-      if (!acc[value.group]) acc[value.group] = [];
-      acc[value.group].push({ key, ...value });
-      return acc;
-    }, {} as GroupedConversions);
-  }
-
-  let file: File | null = null;
-  let conversionType = "jpg-to-png";
-  let isConverting = false;
+  let selectedConversion = "jpg-to-png";
+  let file = null;
+  let message = { type: "", text: "" };
+  let isLoading = false;
   let progress = 0;
-  let statusMessage = "";
-  let errorMessage = "";
-  let downloadUrl = "";
-  let showSuccess = false;
 
-  const API_URL = "http://localhost:3000";
+  // Rótulos mais concisos
+  const conversionTypes = [
+    { value: "jpg-to-png", label: "JPG → PNG" },
+    { value: "pdf-to-docx", label: "PDF → DOCX" },
+    { value: "docx-to-pdf", label: "DOCX → PDF" },
+    { value: "txt-to-pdf", label: "TXT → PDF" },
+    { value: "audio", label: "Áudio" }, // Simplificado.
+  ];
 
-  const conversionTypes = {
-    "jpg-to-png": {
-      label: "JPG → PNG",
-      accept: "image/jpeg",
-      group: "Imagens",
-    },
-    "pdf-to-docx": {
-      label: "PDF → DOCX",
-      accept: "application/pdf",
-      group: "Documentos",
-    },
-    "docx-to-pdf": {
-      label: "DOCX → PDF",
-      accept:
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      group: "Documentos",
-    },
-    "txt-to-pdf": {
-      label: "TXT → PDF",
-      accept: "text/plain",
-      group: "Documentos",
-    },
-    "mp3-to-wav": {
-      label: "MP3 → WAV",
-      accept: "audio/mpeg",
-      group: "Áudio",
-    },
-    "wav-to-mp3": {
-      label: "WAV → MP3",
-      accept: "audio/wav",
-      group: "Áudio",
-    },
-  };
-
-  function handleFileSelect(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      file = input.files[0];
-      errorMessage = "";
-      statusMessage = `Arquivo selecionado: ${file.name}`;
-    }
+  function handleFileChange(event) {
+    file = event.target.files[0];
+    message = { type: "", text: "" };
+    progress = 0;
   }
 
-  async function handleConvert() {
+  function handleDragOver(event) {
+    event.preventDefault();
+    event.currentTarget.classList.add("drag-over");
+  }
+
+  function handleDragLeave(event) {
+    event.currentTarget.classList.remove("drag-over");
+  }
+
+  function handleDrop(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove("drag-over");
+    file = event.dataTransfer.files[0];
+    message = { type: "", text: "" };
+    progress = 0;
+  }
+
+  async function handleSubmit() {
     if (!file) {
-      errorMessage = "Por favor, selecione um arquivo";
+      message = { type: "error", text: "Selecione um arquivo." }; // Texto mais curto
       return;
     }
 
-    isConverting = true;
+    isLoading = true;
+    message = { type: "", text: "" };
     progress = 0;
-    errorMessage = "";
-    statusMessage = "Iniciando conversão...";
-    showSuccess = false;
 
     const formData = new FormData();
     formData.append("file", file);
+    if (selectedConversion === "audio") {
+      // Logic for audio conversion format remains the same
+      const targetAudioFormat = file.type === "audio/mpeg" ? "wav" : "mp3";
+      formData.append("targetFormat", targetAudioFormat);
+    }
 
     try {
-      let endpoint = `${API_URL}/convert/`;
-      let targetFormat = "";
-
-      switch (conversionType) {
-        case "jpg-to-png":
-          endpoint += "jpg-to-png";
-          break;
-        case "pdf-to-docx":
-          endpoint += "pdf-to-docx";
-          break;
-        case "docx-to-pdf":
-          endpoint += "docx-to-pdf";
-          break;
-        case "txt-to-pdf":
-          endpoint += "txt-to-pdf";
-          break;
-        case "mp3-to-wav":
-          endpoint += "audio";
-          targetFormat = "wav";
-          break;
-        case "wav-to-mp3":
-          endpoint += "audio";
-          targetFormat = "mp3";
-          break;
-        default:
-          throw new Error("Tipo de conversão não suportado");
-      }
-
-      if (targetFormat) {
-        formData.append("targetFormat", targetFormat);
-      }
-
-      statusMessage = "Enviando arquivo...";
-      progress = 20;
-
-      const response = await axios.post(endpoint, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await axios.post(
+        `http://localhost:3000/convert/${selectedConversion}`,
+        formData,
+        {
+          responseType: "blob",
+          onUploadProgress: (p) => {
+            progress = Math.round((p.loaded * 100) / p.total);
+          },
         },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            progress = 20 + (progressEvent.loaded / progressEvent.total) * 30;
-          }
-        },
-      });
+      );
 
-      statusMessage = "Processando arquivo...";
-      progress = 50;
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
 
-      if (response.data.success) {
-        statusMessage = "Download iniciado...";
-        progress = 80;
-
-        // Simula o download para mostrar progresso
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        downloadUrl = response.data.downloadUrl;
-        progress = 100;
-        statusMessage = "Conversão concluída com sucesso!";
-        showSuccess = true;
-
-        // Inicia o download automaticamente
-        window.location.href = downloadUrl;
-      } else {
-        throw new Error(response.data.message || "Erro na conversão");
+      let filename = `convertido-${Date.now()}`;
+      if (selectedConversion === "jpg-to-png") filename += ".png";
+      else if (selectedConversion === "pdf-to-docx") filename += ".docx";
+      else if (selectedConversion === "docx-to-pdf") filename += ".pdf";
+      else if (selectedConversion === "txt-to-pdf") filename += ".pdf";
+      else if (selectedConversion === "audio") {
+        const targetAudioFormat = file.type === "audio/mpeg" ? "wav" : "mp3";
+        filename += `.${targetAudioFormat}`;
       }
+
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      message = { type: "success", text: "Conversão concluída!" }; // Texto mais curto
     } catch (error) {
-      console.error("Erro:", error);
-      errorMessage =
-        error instanceof Error ? error.message : "Erro na conversão";
-      statusMessage = "Falha na conversão";
+      console.error("Conversion error:", error);
+      message = {
+        type: "error",
+        text: `Erro na conversão: ${error.response?.data?.details || error.message}`,
+      };
     } finally {
-      isConverting = false;
+      isLoading = false;
+      progress = 0;
+      file = null;
     }
   }
 
-  function resetForm() {
-    file = null;
-    errorMessage = "";
-    statusMessage = "";
-    progress = 0;
-    showSuccess = false;
-    const fileInput = document.querySelector(
-      'input[type="file"]',
-    ) as HTMLInputElement;
-    if (fileInput) fileInput.value = "";
-  }
+  onMount(() => {
+    // Initialization logic
+  });
 </script>
 
-<main
-  class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8"
->
-  <div class="max-w-3xl mx-auto">
-    <div class="text-center mb-12">
-      <h1
-        class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl"
-      >
-        Conversor de Arquivos
-      </h1>
-      <p class="mt-5 text-xl text-gray-500">
-        Converta seus arquivos facilmente entre diferentes formatos
-      </p>
-    </div>
-
-    <div
-      class="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm bg-opacity-90"
-    >
-      <!-- Seleção de Tipo de Conversão -->
-      <div class="mb-8">
-        <label
-          for="conversion-type"
-          class="block text-lg font-semibold text-gray-700 mb-3"
-        >
-          Tipo de Conversão
-        </label>
-        <select
-          id="conversion-type"
-          bind:value={conversionType}
-          class="block w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-          disabled={isConverting}
-        >
-          {#each Object.entries(groupConversions(conversionTypes)) as [group, files]}
-            <optgroup label={group}>
-              {#each files as { key, label }}
-                <option value={key}>{label}</option>
-              {/each}
-            </optgroup>
+<div class="min-h-screen flex items-center justify-center p-4">
+  <div class="card w-full max-w-2xl mx-auto">
+    <h1 class="text-center">Konvrt</h1>
+    <p class="text-center text-base text-gray-600 mb-6">
+      Conversores de arquivo simples e rápidos.
+    </p>
+    <div class="grid grid-cols-1 gap-4">
+      <div>
+        <h2 class="text-lg font-semibold mb-2">
+          Selecione o tipo de conversão
+        </h2>
+        <select bind:value={selectedConversion}>
+          {#each conversionTypes as type}
+            <option value={type.value}>{type.label}</option>
           {/each}
         </select>
       </div>
 
-      <!-- Upload de Arquivo -->
-      <div class="mb-8">
+      <div>
+        <h2 class="text-lg font-semibold mb-2">Selecione o arquivo</h2>
         <label
           for="file-upload"
-          class="block text-lg font-semibold text-gray-700 mb-3"
+          class="custom-file-upload block"
+          on:dragover|preventDefault={handleDragOver}
+          on:dragleave|preventDefault={handleDragLeave}
+          on:drop|preventDefault={handleDrop}
         >
-          Arquivo
+          <input id="file-upload" type="file" on:change={handleFileChange} />
+          <div class="text-gray-500">
+            <svg
+              class="mx-auto h-10 w-10"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a4 4 0 011 7.9M12 13V1a1 1 0 00-1-1h-2a1 1 0 00-1 1v12a1 1 0 001 1h2a1 1 0 001-1zM4 14l4-4m0 0l4 4"
+              ></path>
+            </svg>
+            <p class="mt-1 text-sm">
+              Arraste aqui ou <span class="text-accent font-medium">clique</span
+              >
+            </p>
+            {#if file}
+              <p class="mt-2 text-sm text-gray-700 font-medium">{file.name}</p>
+            {/if}
+          </div>
         </label>
-        <div class="flex items-center justify-center w-full">
-          <label
-            for="file-upload"
-            class="flex flex-col w-full h-40 border-4 border-dashed border-gray-300 rounded-xl hover:bg-gray-50 hover:border-blue-400 transition-all duration-200 cursor-pointer"
-          >
-            <div class="flex flex-col items-center justify-center pt-7">
-              <svg
-                class="w-16 h-16 text-gray-400 group-hover:text-blue-500 transition-colors duration-200"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <p
-                class="pt-4 text-base tracking-wide text-gray-600 group-hover:text-blue-500"
-              >
-                {file
-                  ? file.name
-                  : "Arraste um arquivo ou clique para selecionar"}
-              </p>
-              <p class="text-sm text-gray-500 mt-2">
-                Formatos aceitos: {conversionTypes[conversionType].accept}
-              </p>
-            </div>
-            <input
-              id="file-upload"
-              type="file"
-              class="opacity-0"
-              accept={conversionTypes[conversionType].accept}
-              on:change={handleFileSelect}
-              disabled={isConverting}
-            />
-          </label>
-        </div>
-      </div>
-
-      <!-- Barra de Progresso -->
-      {#if isConverting}
-        <div class="mb-8">
-          <div class="w-full bg-gray-200 rounded-full h-3">
-            <div
-              class="bg-blue-600 h-3 rounded-full transition-all duration-300 ease-in-out"
-              style="width: {progress}%"
-            ></div>
-          </div>
-          <p class="text-sm text-gray-600 mt-3 font-medium">{statusMessage}</p>
-        </div>
-      {/if}
-
-      <!-- Mensagens de Erro e Sucesso -->
-      {#if errorMessage}
-        <div
-          class="mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg"
-        >
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg
-                class="h-5 w-5 text-red-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <p class="text-sm">{errorMessage}</p>
-            </div>
-          </div>
-        </div>
-      {/if}
-
-      {#if showSuccess}
-        <div
-          class="mb-8 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg"
-        >
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg
-                class="h-5 w-5 text-green-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <p class="text-sm">
-                Arquivo convertido com sucesso! O download começará
-                automaticamente.
-              </p>
-            </div>
-          </div>
-        </div>
-      {/if}
-
-      <!-- Botões -->
-      <div class="flex justify-between space-x-4">
-        <button
-          class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 disabled:opacity-50 transition-all duration-200 font-medium"
-          on:click={resetForm}
-          disabled={isConverting}
-        >
-          Limpar
-        </button>
-        <button
-          class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 transition-all duration-200 font-medium"
-          on:click={handleConvert}
-          disabled={!file || isConverting}
-        >
-          {isConverting ? "Convertendo..." : "Converter"}
-        </button>
       </div>
     </div>
-  </div>
-</main>
 
-<style>
-  :global(body) {
-    font-family:
-      system-ui,
-      -apple-system,
-      sans-serif;
-  }
+    <div class="mt-6 text-center">
+      <button
+        on:click={handleSubmit}
+        disabled={isLoading || !file}
+        class="w-full"
+      >
+        {#if isLoading}
+          Convertendo...
+        {:else}
+          Converter
+        {/if}
+      </button>
+    </div>
+
+    {#if isLoading && progress > 0}
+      <div class="progress-bar-container mt-4">
+        <div class="progress-bar" style="width: {progress}%;"></div>
+      </div>
+      <p class="text-center text-xs text-gray-500 mt-1">{progress}%</p>
+    {/if}
+
+    {#if message.text}
+      <div class="message-box {message.type} mt-4">{message.text}</div>
+    {/if}
+
+    <footer class="mt-8 text-center text-gray-500 text-xs">
+      <p class="mt-1">
+        <a
+          href="https://github.com/torqu4to/file-converter-app"
+          target="_blank"
+          rel="noopener noreferrer">Repositório no GitHub</a
+        >
+      </p>
+    </footer>
+  </div>
+</div>
+
+<style lang="postcss">
+  /* Styles from app.css will apply */
 </style>
