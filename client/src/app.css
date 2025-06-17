@@ -2,6 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .card {
+    @apply bg-card-background rounded-lg shadow-lg p-6;
+  }
+
+  h1 {
+    @apply text-3xl font-bold text-primary mb-2;
+  }
+
+  select {
+    @apply w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent;
+  }
+
+  .custom-file-upload {
+    @apply border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer transition-colors duration-200;
+  }
+
+  .custom-file-upload:hover {
+    @apply border-accent bg-accent/5;
+  }
+
+  .custom-file-upload.drag-over {
+    @apply border-accent bg-accent/10;
+  }
+
+  .custom-file-upload input[type="file"] {
+    @apply hidden;
+  }
+
+  button {
+    @apply bg-accent text-white py-2 px-4 rounded-md hover:bg-accent/90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .progress-bar-container {
+    @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+  }
+
+  .progress-bar {
+    @apply bg-accent h-full transition-all duration-300;
+  }
+
+  .message-box {
+    @apply p-3 rounded-md text-sm;
+  }
+
+  .message-box.success {
+    @apply bg-success/10 text-success;
+  }
+
+  .message-box.error {
+    @apply bg-error/10 text-error;
+  }
+
+  .message-box.info {
+    @apply bg-info/10 text-info;
+  }
+
+  /* Estilos para a lista de arquivos */
+  .file-list {
+    @apply mt-2 space-y-1;
+  }
+
+  .file-list li {
+    @apply truncate px-2 py-1 rounded bg-gray-50;
+  }
+
+  /* Estilo para o container de arquivos selecionados */
+  .selected-files {
+    @apply mt-2 max-h-32 overflow-y-auto;
+  }
+}
+
 :root {
   --color-primary: #4A4A4A;
   --color-secondary: #6B7280;
@@ -51,56 +123,12 @@ a:hover {
   text-decoration: underline;
 }
 
-h1 {
-  font-size: 3em;
-  /* Levemente menor para caber no container */
-  line-height: 1.1;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: 0.8em;
-  /* Ajuste o espaçamento */
-}
-
 h2 {
   font-size: 1.8em;
   /* Títulos de seção menores */
   font-weight: 600;
   color: var(--color-primary);
   margin-bottom: 0.6em;
-}
-
-.card {
-  padding: 2em;
-  /* Padding ajustado para o container menor */
-  background-color: var(--color-card-background);
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  /* Sombra mais sutil */
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.7em 1.5em;
-  /* Botões menores */
-  font-size: 1em;
-  /* Fonte menor */
-  font-weight: 500;
-  font-family: 'Inter', sans-serif;
-  background-color: var(--color-accent);
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(108, 99, 255, 0.2);
-  /* Sombra ajustada */
-}
-
-button:hover {
-  background-color: #5A52E6;
-  border-color: #5A52E6;
-  transform: translateY(-1px);
-  /* Leve elevação */
-  box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
 }
 
 button:focus,
@@ -126,101 +154,4 @@ button:focus-visible {
     background-color: var(--color-accent);
     color: white;
   }
-}
-
-input[type="file"] {
-  display: none;
-}
-
-.custom-file-upload {
-  border: 2px dashed var(--color-border);
-  border-radius: 8px;
-  padding: 1.8em;
-  /* Padding ajustado */
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background-color: var(--color-card-background);
-}
-
-.custom-file-upload:hover {
-  border-color: var(--color-accent);
-  background-color: #F0F2F5;
-}
-
-.custom-file-upload.drag-over {
-  border-color: var(--color-accent);
-  background-color: #F0F2F5;
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
-}
-
-
-
-
-select {
-  width: 100%;
-  padding: 0.7em;
-  /* Padding ajustado */
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background-color: var(--color-card-background);
-  color: var(--color-primary);
-  font-size: 0.95em;
-  /* Fonte menor */
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%236B7280" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  /* Seta personalizada com a cor secundária */
-  background-repeat: no-repeat;
-  background-position: right 0.8em center;
-  background-size: 0.9em;
-  /* Tamanho da seta ajustado */
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-}
-
-select:focus {
-  border-color: var(--color-accent);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
-}
-
-.message-box {
-  padding: 0.8em 1.2em;
-  /* Padding ajustado */
-  border-radius: 8px;
-  margin-top: 1.2em;
-  /* Margem ajustada */
-  font-size: 0.9em;
-  /* Fonte menor */
-  font-weight: 500;
-}
-
-.message-box.success {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: var(--color-success);
-  border: 1px solid var(--color-success);
-}
-
-.message-box.error {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-error);
-  border: 1px solid var(--color-error);
-}
-
-.progress-bar-container {
-  width: 100%;
-  background-color: #E0E0E0;
-  border-radius: 5px;
-  margin-top: 0.8em;
-  /* Margem ajustada */
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 8px;
-  /* Altura menor */
-  background-color: var(--color-accent);
-  width: 0%;
-  border-radius: 5px;
-  transition: width 0.3s ease-in-out;
 }
